@@ -1,5 +1,9 @@
 # encoding=utf-8
 
+import logging
+
+from pytz.gae import pytz
+
 import model
 import util
 
@@ -38,6 +42,11 @@ def get_all():
     settings = memcache.get('gaewiki:settings')
     if settings is None:
         settings = util.parse_page(get_host_page().body)
+        try:
+            pytz.timezone(settings['timezone'])
+        except pytz.UnknownTimeZoneError as e:
+            logging.warning('Unknown timezone: %s, reset to UTC' % settings['timezone'])
+            settings['timezone'] = 'UTC'
         memcache.set('gaewiki:settings', settings)
     return settings
 
