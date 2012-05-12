@@ -1,7 +1,10 @@
 application: gaewiki-demo
 version: 1
-runtime: python
+runtime: python27
+threadsafe: yes
 api_version: 1
+
+default_expiration: "7d"
 
 handlers:
 - url: /gae-wiki-static/
@@ -10,12 +13,8 @@ handlers:
   static_files: gaewiki/static/favicon.ico
   upload: gaewiki/static/favicon.ico
 - url: .*
-  script: gaewiki
+  script: gaewiki.application
 
-#- url: /static/
-#  static_dir: static
-#- url: .*
-#  script: handlers.py
-
-builtins:
-- datastore_admin: on
+libraries:
+- name: django
+  version: "1.2"
