@@ -359,7 +359,7 @@ class DataImportHandler(RequestHandler):
         for title, content in loaded.items():
             page = model.WikiContent.get_by_title(title)
             author = content['author'] and users.User(content['author'])
-            page.update(content['body'], author, False)
+            page.update(content['body'], author, comment='imported', delete=False)
 
         self.reply("Done.")
 
