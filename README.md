@@ -18,7 +18,7 @@ Installation
 Contributors
 ------------
 
-See gaewiki/AUTHORS
+See AUTHORS
 
 
 License
