@@ -1,8 +1,10 @@
-syntax: glob
-*.pyc
-*.sh
-*~
-.*.swp
+syntax: regexp
+.*\.pyc
+.*\.sh
+.*~
+\..*\.swp
 .tmp
-config.py
-app.yaml
+config\.py
+app\.yaml
+gaewiki/static-(?!default|scripts)
+gaewiki/templates-(?!default)

@@ -2,15 +2,6 @@
 {% block title %}Editing "{{ page.title|escape }}"{% if settings.wiki_title %} — {{ settings.wiki_title|escape }}{% endif %}{% endblock %}
 {% block heads %}
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
-<!--
-<script type="text/javascript" src="/gae-wiki-static/scripts/markitup/jquery.markitup.pack.js"></script>
-<script type="text/javascript" src="/gae-wiki-static/scripts/markitup/sets/markdown/set.js"></script>
--->
-<script type="text/javascript" src="/gae-wiki-static/editor.js"></script>
-<!--
-<link rel="stylesheet" type="text/css" href="/gae-wiki-static/scripts/markitup/skins/markitup/style.css" />
-<link rel="stylesheet" type="text/css" href="/gae-wiki-static/scripts/markitup/sets/markdown/style.css" />
--->
 {% endblock %}
 {% block content %}
   <ul id="tabs">
