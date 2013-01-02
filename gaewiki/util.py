@@ -53,11 +53,15 @@ def parse_markdown(text):
     return markdown.markdown(text, settings.get('markdown-extensions', [])).strip()
 
 
-WIKI_WORD_PATTERN = re.compile("\[\[(.+?)\]\]")
+# matching [[ ... ]] but not \[[ ... ]] in code block or \\[[ ... ]]  in normal
+# text.
+WIKI_WORD_PATTERN = re.compile(r"(?<!\\)\[\[(.+?)\]\]")
 
 
 def wikify(text, title=None):
     text, count = WIKI_WORD_PATTERN.subn(lambda x: wikify_one(x, title), text)
+    # remove prefixing \ from \[[ ... ]] or \\[[ ... ]]
+    text = re.sub(r'\\(\[\[(.+?)\]\])', r'\1', text)
     text = re.sub(r'\.  ', '.&nbsp; ', text)
     text = re.sub(u' +(—|--) +', u'&nbsp;— ', text)
     return text
