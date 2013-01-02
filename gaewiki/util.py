@@ -100,7 +100,9 @@ def wikify_one(pat, real_page_title):
     page_hint = page_name
     page_text = page_title
 
-    if page is None or not page.is_saved():
+    if page_name.startswith('w/'):
+        pass
+    elif page is None or not page.is_saved():
         page_class += " missing"
         page_hint += " (create)"
         page_link = "/w/edit?page=" + pageurl_rel(page_name)
