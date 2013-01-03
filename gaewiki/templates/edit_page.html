@@ -2,6 +2,26 @@
 {% block title %}Editing "{{ page.title|escape }}"{% if settings.wiki_title %} — {{ settings.wiki_title|escape }}{% endif %}{% endblock %}
 {% block heads %}
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+<script>
+$(function () {
+  $('input[name=Preview]')
+    .click(function (evt) {
+      var $form = $('form');
+      $.ajax({
+        type: "POST",
+        url: $form.attr('action'),
+        data: $form.serialize() + '&Preview=Preview',
+        success: function(data) {
+          $('#preview').replaceWith($('#preview', data));
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+          alert(xhr.status + ': ' + xhr.statusText);
+        }
+      });
+      evt.preventDefault();
+    });
+});
+</script>
 {% endblock %}
 {% block content %}
   <ul id="tabs">
