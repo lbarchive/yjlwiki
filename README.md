@@ -23,9 +23,9 @@ I only made some changes when I felt needed, here is a short list:
 * Python 2.7 / Django 1.2.
 * gae-pytz with pytz-2012h.
 * Markdown 2.2.1
-* [Internal link escaping syntax][int-escape] for code block (`\[[ ... ]]`) or normal text (`\\[[ ... ]]`).
+* Use Markdown wikilinks extension to handle internal wiki link:
 
-[int-escape]: https://bitbucket.org/livibetter/yjlwiki/commits/c727f1ab00b15325031de2e8e09687afc220c897
+  * Temporarily disabled: `List`, `ListChildren`, `gaewiki:mp3player`, `gaewiki:map`, `Image`.
 
 
 Contributors

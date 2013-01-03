@@ -7,6 +7,7 @@ import re
 import urllib
 
 import markdown
+from markdown.extensions.wikilinks import WikiLinkExtension, WikiLinks
 import model
 import settings
 import images
@@ -46,30 +47,54 @@ def wikify_filter(text, display_title=None, page_name=None):
         if not display_title.strip():
             new = ''
         text = re.sub('<h1>(.+)</h1>', new, text)
-    return wikify(text, title=page_name)
-
-
-def parse_markdown(text):
-    return markdown.markdown(text, settings.get('markdown-extensions', [])).strip()
-
-
-# matching [[ ... ]] but not \[[ ... ]] in code block or \\[[ ... ]]  in normal
-# text.
-WIKI_WORD_PATTERN = re.compile(r"(?<!\\)\[\[(.+?)\]\]")
-
-
-def wikify(text, title=None):
-    text, count = WIKI_WORD_PATTERN.subn(lambda x: wikify_one(x, title), text)
-    # remove prefixing \ from \[[ ... ]] or \\[[ ... ]]
-    text = re.sub(r'\\(\[\[(.+?)\]\])', r'\1', text)
-    text = re.sub(r'\.  ', '.&nbsp; ', text)
-    text = re.sub(u' +(—|--) +', u'&nbsp;— ', text)
     return text
 
 
-def wikify_one(pat, real_page_title):
+def _extendMarkdown(self, md, md_globals):
+    self.md = md
+
+    # append to end of inline patterns
+    WIKILINK_RE = r'\[\[([\w0-9_ /-]+([:|].*?)?)\]\]'
+    wikilinkPattern = WikiLinks(WIKILINK_RE, self.getConfigs())
+    wikilinkPattern.md = md
+    md.inlinePatterns.add('wikilink', wikilinkPattern, "<not_strong")
+WikiLinkExtension.extendMarkdown = _extendMarkdown
+
+
+def _handleMatch(self, m):
+    if m.group(2).strip():
+        base_url, end_url, html_class = self._getMeta()
+        label = m.group(2).strip()
+        url = self.config['build_url'](label, base_url, end_url)
+        if isinstance(url, tuple):
+          (url, label, html_class, title) = url
+        elif isinstance(url, markdown.util.etree.Element):
+          return url
+        a = markdown.util.etree.Element('a')
+        a.text = label 
+        a.set('href', url)
+        a.set('title', title)
+        if html_class:
+            a.set('class', html_class)
+    else:
+        a = ''
+    return a
+WikiLinks.handleMatch = _handleMatch
+
+
+def parse_markdown(text):
+    extension_configs = {'wikilinks': [('build_url', wikify_one)]}
+    return markdown.markdown(text,
+                             extensions=settings.get('markdown-extensions', []) + ['wikilinks'],
+                             extension_configs=extension_configs).strip()
+
+
+WIKI_WORD_PATTERN = re.compile(r"\[\[(.+?)\]\]")
+
+
+def wikify_one(label, base, end):
     """Wikifies one link."""
-    page_name = page_title = pat.group(1)
+    page_name = page_title = label
     if "|" in page_name:
         page_name, page_title = page_name.split("|", 1)
     elif '/' in page_name:
@@ -81,17 +106,17 @@ def wikify_one(pat, real_page_title):
         if ' ' not in parts[0]:
             if page_name == page_title:
                 page_title = parts[1]
-            if parts[0] == 'List':
-                return list_pages_by_label(parts[1])
-            elif parts[0] == 'gaewiki':
-                return process_special_token(parts[1], real_page_title)
-            elif parts[0] == 'ListChildren':
-                return list_pages_by_label('gaewiki:parent:' + (parts[1] or real_page_title))
-            elif parts[0] == 'Image':
-                return render_image(parts[1].split(";"), page_title)
+            #if parts[0] == 'List':
+            #    return list_pages_by_label(parts[1])
+            #elif parts[0] == 'gaewiki':
+            #    return process_special_token(parts[1], real_page_title)
+            #elif parts[0] == 'ListChildren':
+            #    return list_pages_by_label('gaewiki:parent:' + (parts[1] or real_page_title))
+            #elif parts[0] == 'Image':
+            #    return render_image(parts[1].split(";"), page_title)
             iwlink = settings.get(u'interwiki-' + parts[0])
             if iwlink:
-                return '<a class="iw iw-%s" href="%s" target="_blank">%s</a>' % (parts[0], iwlink.replace('%s', urllib.quote(parts[1].encode('utf-8'))), page_title)
+                return iwlink.replace('%s', urllib.quote(parts[1].encode('utf-8'))), page_title, "iw iw-%s" % parts[0], page_title
 
     page = model.WikiContent.get_by_title(page_name)
 
@@ -107,12 +132,7 @@ def wikify_one(pat, real_page_title):
         page_hint += " (create)"
         page_link = "/w/edit?page=" + pageurl_rel(page_name)
 
-    return '<a class="%(class)s" href="%(href)s" title="%(hint)s">%(text)s</a>' % {
-        "class": page_class,
-        "href": page_link,
-        "hint": cgi.escape(page_hint),
-        "text": cgi.escape(page_text),
-    }
+    return page_link, page_text, page_class, page_hint
 
 
 def render_image(args, title):
@@ -267,6 +287,9 @@ def extract_links(text):
 
     links = []
 
+    # FIXME Since using wikilinks extension, the pattern [[ ]] in code block
+    # will no longer being recognized. But the following will still count those
+    # as wiki links.
     for link in re.findall(WIKI_WORD_PATTERN, text):
         if "|" in link:
             link = link.split("|", 1)[0]

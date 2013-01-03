@@ -127,7 +127,7 @@ def list_pages(pages):
         lines.append((title, link_line(title)))
     return render('index.html', {
         'pages': pages,
-        'html': util.wikify(util.parse_markdown('\n'.join(line[1] for line in lines))),
+        'html': util.parse_markdown('\n'.join(line[1] for line in lines)),
     })
 
 
