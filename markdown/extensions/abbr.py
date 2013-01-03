@@ -13,8 +13,8 @@ Simple Usage:
     ... *[ABBR]: Abbreviation
     ... *[REF]: Abbreviation Reference
     ... """
-    >>> markdown.markdown(text, ['abbr'])
-    u'<p>Some text with an <abbr title="Abbreviation">ABBR</abbr> and a <abbr title="Abbreviation Reference">REF</abbr>. Ignore REFERENCE and ref.</p>'
+    >>> print markdown.markdown(text, ['abbr'])
+    <p>Some text with an <abbr title="Abbreviation">ABBR</abbr> and a <abbr title="Abbreviation Reference">REF</abbr>. Ignore REFERENCE and ref.</p>
 
 Copyright 2007-2008
 * [Waylan Limberg](http://achinghead.com/)
@@ -23,8 +23,9 @@ Copyright 2007-2008
 
 '''
 
-import markdown, re
-from markdown import etree
+import re
+import markdown
+from markdown.util import etree
 
 # Global Vars
 ABBR_REF_RE = re.compile(r'[*]\[(?P<abbr>[^\]]*)\][ ]?:\s*(?P<title>.*)')

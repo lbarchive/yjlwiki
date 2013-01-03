@@ -22,14 +22,17 @@ License: [BSD](http://www.opensource.org/licenses/bsd-license.php)
 
 Dependencies:
 * [Python2.3+](http://python.org)
-* [Markdown 2.0+](http://www.freewisdom.org/projects/python-markdown/)
+* [Markdown 2.0+](http://packages.python.org/Markdown/)
 * [HTML Tidy](http://utidylib.berlios.de/)
 * [uTidylib](http://utidylib.berlios.de/)
 
 """
 
 import markdown
-import tidy
+try:
+    import tidy
+except ImportError:
+    tidy = None
 
 class TidyExtension(markdown.Extension):
 
@@ -37,6 +40,7 @@ class TidyExtension(markdown.Extension):
         # Set defaults to match typical markdown behavior.
         self.config = dict(output_xhtml=1,
                            show_body_only=1,
+                           char_encoding='utf8'
                           )
         # Merge in user defined configs overriding any present if nessecary.
         for c in configs:
@@ -46,7 +50,8 @@ class TidyExtension(markdown.Extension):
         # Save options to markdown instance
         md.tidy_options = self.config
         # Add TidyProcessor to postprocessors
-        md.postprocessors['tidy'] = TidyProcessor(md)
+        if tidy:
+            md.postprocessors['tidy'] = TidyProcessor(md)
 
 
 class TidyProcessor(markdown.postprocessors.Postprocessor):
@@ -54,8 +59,10 @@ class TidyProcessor(markdown.postprocessors.Postprocessor):
     def run(self, text):
         # Pass text to Tidy. As Tidy does not accept unicode we need to encode
         # it and decode its return value.
-        return unicode(tidy.parseString(text.encode('utf-8'), 
-                                        **self.markdown.tidy_options)) 
+        enc = self.markdown.tidy_options.get('char_encoding', 'utf8')
+        return unicode(tidy.parseString(text.encode(enc), 
+                                        **self.markdown.tidy_options),
+                       encoding=enc) 
 
 
 def makeExtension(configs=None):

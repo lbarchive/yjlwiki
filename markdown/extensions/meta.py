@@ -17,30 +17,32 @@ Basic Usage:
     ... The body. This is paragraph one.
     ... '''
     >>> md = markdown.Markdown(['meta'])
-    >>> md.convert(text)
-    u'<p>The body. This is paragraph one.</p>'
-    >>> md.Meta
+    >>> print md.convert(text)
+    <p>The body. This is paragraph one.</p>
+    >>> print md.Meta
     {u'blank_data': [u''], u'author': [u'Waylan Limberg', u'John Doe'], u'title': [u'A Test Doc.']}
 
 Make sure text without Meta Data still works (markdown < 1.6b returns a <p>).
 
     >>> text = '    Some Code - not extra lines of meta data.'
     >>> md = markdown.Markdown(['meta'])
-    >>> md.convert(text)
-    u'<pre><code>Some Code - not extra lines of meta data.\\n</code></pre>'
+    >>> print md.convert(text)
+    <pre><code>Some Code - not extra lines of meta data.
+    </code></pre>
     >>> md.Meta
     {}
 
 Copyright 2007-2008 [Waylan Limberg](http://achinghead.com).
 
-Project website: <http://www.freewisdom.org/project/python-markdown/Meta-Data>
+Project website: <http://packages.python.org/Markdown/meta_data.html>
 Contact: markdown@freewisdom.org
 
-License: BSD (see ../docs/LICENSE for details)
+License: BSD (see ../LICENSE.md for details)
 
 """
+import re
 
-import markdown, re
+import markdown
 
 # Global Vars
 META_RE = re.compile(r'^[ ]{0,3}(?P<key>[A-Za-z0-9_-]+):\s*(?P<value>.*)')
@@ -69,7 +71,11 @@ class MetaPreprocessor(markdown.preprocessors.Preprocessor):
             m1 = META_RE.match(line)
             if m1:
                 key = m1.group('key').lower().strip()
-                meta[key] = [m1.group('value').strip()]
+                value = m1.group('value').strip()
+                try:
+                    meta[key].append(value)
+                except KeyError:
+                    meta[key] = [value]
             else:
                 m2 = META_MORE_RE.match(line)
                 if m2 and key:
