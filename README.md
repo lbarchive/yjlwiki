@@ -27,6 +27,7 @@ I only made some changes when I felt needed, here is a short list:
 
   * Temporarily disabled: `List`, `ListChildren`, `gaewiki:mp3player`, `gaewiki:map`, `Image`.
 
+* Add `yjlwiki_preview_callback` hook.
 
 Contributors
 ------------

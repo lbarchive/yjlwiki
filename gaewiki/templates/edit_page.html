@@ -13,6 +13,9 @@ $(function () {
         data: $form.serialize() + '&Preview=Preview',
         success: function(data) {
           $('#preview').replaceWith($('#preview', data));
+          if (window.yjlwiki_preview_callback) {
+            window.yjlwiki_preview_callback();
+          }
         },
         error: function (xhr, ajaxOptions, thrownError) {
           alert(xhr.status + ': ' + xhr.statusText);
